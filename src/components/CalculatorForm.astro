@@ -1,0 +1,70 @@
+<form class="panel controls" id="calculator">
+  <label>
+    Solve for
+    <select id="solveFor">
+      <option value="payoff" selected>Payoff time &amp; total interest</option>
+      <option value="payment">Monthly principal &amp; interest payment</option>
+      <option value="principal">Loan amount</option>
+      <option value="rate">Annual interest rate</option>
+      <option value="payments">Number of payments from payment</option>
+    </select>
+  </label>
+
+  <div class="field-grid">
+    <label>
+      Loan amount
+      <input id="principal" inputmode="decimal" value="200,000" autocomplete="off" />
+    </label>
+
+    <div class="inline">
+      <label>
+        Annual interest rate
+        <input id="rate" inputmode="decimal" value="6.75" autocomplete="off" />
+      </label>
+      <label>
+        Number of payments
+        <input id="payments" inputmode="numeric" value="360" autocomplete="off" readonly />
+      </label>
+    </div>
+
+    <label>
+      Monthly principal &amp; interest payment
+      <span class="input-action-row">
+        <input id="payment" inputmode="decimal" value="1,297.20" autocomplete="off" />
+        <button type="button" class="secondary inline-action" id="termCalc" aria-expanded="false" aria-controls="termMenu">Calc</button>
+        <span class="term-menu" id="termMenu" role="menu">
+          <button type="button" data-years="10" role="menuitem">10y</button>
+          <button type="button" data-years="15" role="menuitem">15y</button>
+          <button type="button" data-years="20" role="menuitem">20y</button>
+          <button type="button" data-years="25" role="menuitem">25y</button>
+          <button type="button" data-years="30" role="menuitem">30y</button>
+        </span>
+      </span>
+    </label>
+
+    <div class="inline">
+      <label>
+        Extra monthly principal
+        <input id="extra" inputmode="decimal" value="0" autocomplete="off" />
+      </label>
+      <label>
+        Extra full payments per year
+        <input id="annualExtraPayments" inputmode="decimal" value="0" autocomplete="off" />
+      </label>
+    </div>
+
+    <div class="inline">
+      <label>
+        Monthly taxes / insurance / HOA
+        <input id="otherCosts" inputmode="decimal" value="1,000" autocomplete="off" />
+      </label>
+    </div>
+  </div>
+
+  <div class="button-row">
+    <button type="button" id="apply">Calculate</button>
+    <button type="button" class="secondary" id="reset">Reset</button>
+  </div>
+
+  <div class="warning" id="warning" role="status"></div>
+</form>

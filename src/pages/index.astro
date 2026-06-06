@@ -1,0 +1,27 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import AppHeader from "../components/AppHeader.astro";
+import CalculatorForm from "../components/CalculatorForm.astro";
+import SummaryPanel from "../components/SummaryPanel.astro";
+import AmortizationTable from "../components/AmortizationTable.astro";
+---
+
+<BaseLayout>
+  <div class="mobile-warning" role="status">This calculator works best on a wider screen. Mobile layouts may require horizontal scrolling for the chart and amortization table.</div>
+  <main>
+    <AppHeader />
+
+    <section class="layout" aria-label="Mortgage calculator">
+      <CalculatorForm />
+
+      <section>
+        <SummaryPanel />
+        <AmortizationTable />
+      </section>
+    </section>
+  </main>
+
+  <script>
+    import "../lib/controller.js";
+  </script>
+</BaseLayout>
