@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
+    "test": "node --test",
     "build": "astro build",
     "preview": "astro preview"
   },

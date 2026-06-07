@@ -11,6 +11,7 @@ export const defaults = {
 
 export const fieldIds = ["solveFor", "principal", "rate", "payments", "payment", "extra", "annualExtraPayments", "otherCosts"];
 export const numericFieldIds = ["principal", "rate", "payments", "payment", "extra", "annualExtraPayments", "otherCosts"];
+export const balanceTolerance = 0.005;
 
 export const currency = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -62,14 +63,12 @@ export function monthlyPayment(principal, annualRate, payments) {
 
 export function payoffPaymentsFromSchedule(values) {
   const schedule = buildSchedule(values);
-  const lastRow = schedule.rows[schedule.rows.length - 1];
-  return lastRow && lastRow.balance <= 0.005 ? schedule.payoffPayments : Infinity;
+  return schedule.payoffPayments;
 }
 
 export function canPayOffWithin(values, targetPayments) {
-  const schedule = buildSchedule(values);
-  const lastRow = schedule.rows[schedule.rows.length - 1];
-  return Boolean(lastRow && lastRow.balance <= 0.005 && schedule.payoffPayments <= targetPayments);
+  const schedule = buildSchedule(values, { maxRows: targetPayments });
+  return Boolean(schedule.paidOff && schedule.payoffPayments <= targetPayments);
 }
 
 export function solvePaymentForTarget(values) {
@@ -127,10 +126,15 @@ export function solve(values) {
   let message = "";
 
   if (next.solveFor === "payoff" || next.solveFor === "payments") {
-    next.payments = payoffPaymentsFromSchedule(next);
+    const schedule = buildSchedule(next);
+    next.payments = schedule.payoffPayments;
     if (!Number.isFinite(next.payments)) {
-      const minimum = next.principal * (next.rate / 100 / 12);
-      message = `Monthly payment plus extra principal must be more than ${currencyCents.format(minimum)} to reduce the balance at this rate.`;
+      if (schedule.status === "stalled") {
+        const minimum = next.principal * (next.rate / 100 / 12);
+        message = `Monthly payment plus extra principal must be more than ${currencyCents.format(minimum)} to reduce the balance at this rate.`;
+      } else {
+        message = "This loan is still amortizing beyond the supported schedule preview.";
+      }
       next.payments = values.payments;
     }
   } else if (next.solveFor === "payment") {
@@ -152,18 +156,20 @@ export function solve(values) {
   return { values: next, message };
 }
 
-export function buildSchedule({ principal, rate, payments, payment, extra, annualExtraPayments = 0 }) {
+export function buildSchedule({ principal, rate, payments, payment, extra, annualExtraPayments = 0 }, { maxRows } = {}) {
   const monthlyRate = rate / 100 / 12;
   let balance = principal;
   let totalInterest = 0;
   const rows = [];
-  const maxRows = Math.max(1200, payments + 600);
+  const rowLimit = maxRows ?? Math.max(12000, payments + 600);
+  let status = principal <= balanceTolerance ? "paid-off" : "truncated";
 
-  for (let i = 1; i <= maxRows && balance > 0.005; i += 1) {
+  for (let i = 1; i <= rowLimit && balance > balanceTolerance; i += 1) {
     const interest = balance * monthlyRate;
+    const recurringAvailable = payment + extra;
     const annualExtra = i % 12 === 0 ? payment * annualExtraPayments : 0;
-    const totalAvailable = payment + extra + annualExtra;
-    if (payment + extra < interest) {
+    const totalAvailable = recurringAvailable + annualExtra;
+    if (recurringAvailable < interest || (recurringAvailable <= interest && payment * annualExtraPayments <= 0)) {
       rows.push({
         number: i,
         principal: 0,
@@ -172,6 +178,7 @@ export function buildSchedule({ principal, rate, payments, payment, extra, annua
         balance
       });
       totalInterest += interest;
+      status = "stalled";
       break;
     }
 
@@ -189,10 +196,21 @@ export function buildSchedule({ principal, rate, payments, payment, extra, annua
     });
   }
 
-  return { rows, totalInterest, payoffPayments: rows.length };
+  const paidOff = balance <= balanceTolerance;
+  if (paidOff) status = "paid-off";
+
+  return {
+    rows,
+    totalInterest,
+    payoffPayments: paidOff ? rows.length : Infinity,
+    paidOff,
+    status,
+    remainingBalance: balance
+  };
 }
 
 export function payoffLabel(payments) {
+  if (!Number.isFinite(payments)) return "Not paid off";
   const years = Math.floor(payments / 12);
   const months = payments % 12;
   if (years === 0) return `${months} mo`;
@@ -205,8 +223,12 @@ export function summarize(values) {
   const amortization = buildSchedule(values);
   const averageAnnualExtra = values.payment * values.annualExtraPayments / 12;
   const allInMonthly = values.payment + values.extra + averageAnnualExtra + values.otherCosts;
-  const interestSaved = Math.max(0, baseline.totalInterest - amortization.totalInterest);
-  const timeSaved = Math.max(0, baseline.payoffPayments - amortization.payoffPayments);
+  const interestSaved = baseline.paidOff && amortization.paidOff
+    ? Math.max(0, baseline.totalInterest - amortization.totalInterest)
+    : 0;
+  const timeSaved = baseline.paidOff && amortization.paidOff
+    ? Math.max(0, baseline.payoffPayments - amortization.payoffPayments)
+    : 0;
 
   return {
     baseline,

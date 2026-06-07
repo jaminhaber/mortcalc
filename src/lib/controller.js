@@ -119,11 +119,22 @@ function renderSchedule(rows, { resetPage = false } = {}) {
 }
 
 function updateSummary(values, summary) {
+  const hasAcceleration = values.extra > 0 || values.annualExtraPayments > 0;
+  const amortizationInterest = summary.amortization.paidOff
+    ? currency.format(summary.amortization.totalInterest)
+    : `>${currency.format(summary.amortization.totalInterest)}`;
+  const baselineInterest = summary.baseline.paidOff
+    ? currency.format(summary.baseline.totalInterest)
+    : `>${currency.format(summary.baseline.totalInterest)}`;
+
+  document.getElementById("allInLabel").textContent = hasAcceleration ? "Avg accelerated monthly" : "Avg monthly";
+  document.getElementById("interestLabel").textContent = hasAcceleration ? "Accelerated interest" : "Total interest";
+  document.getElementById("payoffLabel").textContent = hasAcceleration ? "Accelerated payoff" : "Payoff";
   document.getElementById("monthlyOut").textContent = currencyCents.format(values.payment);
   document.getElementById("allInOut").textContent = currencyCents.format(summary.allInMonthly);
-  document.getElementById("interestOut").textContent = currency.format(summary.amortization.totalInterest);
+  document.getElementById("interestOut").textContent = amortizationInterest;
   document.getElementById("payoffOut").textContent = payoffLabel(summary.amortization.payoffPayments);
-  document.getElementById("baseInterestOut").textContent = currency.format(summary.baseline.totalInterest);
+  document.getElementById("baseInterestOut").textContent = baselineInterest;
   document.getElementById("basePayoffOut").textContent = payoffLabel(summary.baseline.payoffPayments);
   document.getElementById("interestSavedOut").textContent = currency.format(summary.interestSaved);
   document.getElementById("timeSavedOut").textContent = payoffLabel(summary.timeSaved);
@@ -155,7 +166,9 @@ function render({ formatInputs = true } = {}) {
   const summary = summarize(values);
   updateSummary(values, summary);
   renderSchedule(summary.amortization.rows, { resetPage: true });
-  drawChart(chart, summary.amortization.rows, values.principal, summary.baseline.rows);
+  drawChart(chart, summary.amortization.rows, values.principal, summary.baseline.rows, {
+    hasAcceleration: values.extra > 0 || values.annualExtraPayments > 0
+  });
 
   if (selection && document.activeElement === selection.element && selection.element.value === selection.value) {
     selection.element.setSelectionRange(selection.start, selection.end);

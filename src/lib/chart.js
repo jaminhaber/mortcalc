@@ -4,7 +4,7 @@ function pluralizePayments(count) {
   return `${count} payment${count === 1 ? "" : "s"}`;
 }
 
-export function drawChart(chart, rows, principal, baselineRows = []) {
+export function drawChart(chart, rows, principal, baselineRows = [], { hasAcceleration = true } = {}) {
   const ctx = chart.getContext("2d");
   if (!ctx) return;
 
@@ -40,7 +40,7 @@ export function drawChart(chart, rows, principal, baselineRows = []) {
 
   if (!rows.length) return;
 
-  if (baselineRows.length) {
+  if (hasAcceleration && baselineRows.length) {
     ctx.strokeStyle = "#9aa6b5";
     ctx.lineWidth = 3;
     ctx.lineCap = "round";
@@ -63,13 +63,16 @@ export function drawChart(chart, rows, principal, baselineRows = []) {
   ctx.font = "20px system-ui, sans-serif";
   const legendY = chart.height - 12;
   const baseLabel = baselineRows.length ? `Base: ${pluralizePayments(baselineRows.length)}` : "";
-  const acceleratedLabel = `Accelerated: ${pluralizePayments(rows.length)}`;
   const gap = 24;
   const swatchWidth = 28;
   const swatchGap = 7;
-  const baseWidth = baseLabel ? swatchWidth + swatchGap + ctx.measureText(baseLabel).width : 0;
-  const acceleratedWidth = swatchWidth + swatchGap + ctx.measureText(acceleratedLabel).width;
-  let legendX = chart.width - pad.right - acceleratedWidth - (baseLabel ? baseWidth + gap : 0);
+  const comparisonBaseLabel = hasAcceleration ? baseLabel : "";
+  const currentLabel = hasAcceleration
+    ? `Accelerated: ${pluralizePayments(rows.length)}`
+    : `Base: ${pluralizePayments(rows.length)}`;
+  const baseWidth = comparisonBaseLabel ? swatchWidth + swatchGap + ctx.measureText(comparisonBaseLabel).width : 0;
+  const currentWidth = swatchWidth + swatchGap + ctx.measureText(currentLabel).width;
+  let legendX = chart.width - pad.right - currentWidth - (comparisonBaseLabel ? baseWidth + gap : 0);
   legendX = Math.max(pad.left + 245, legendX);
 
   function drawLegendItem(x, color, label, lineWidth) {
@@ -85,8 +88,8 @@ export function drawChart(chart, rows, principal, baselineRows = []) {
     return x + swatchWidth + swatchGap + ctx.measureText(label).width;
   }
 
-  if (baseLabel) {
-    legendX = drawLegendItem(legendX, "#9aa6b5", baseLabel, 3) + gap;
+  if (comparisonBaseLabel) {
+    legendX = drawLegendItem(legendX, "#9aa6b5", comparisonBaseLabel, 3) + gap;
   }
-  drawLegendItem(legendX, "#2367c8", acceleratedLabel, 5);
+  drawLegendItem(legendX, "#2367c8", currentLabel, 5);
 }
