@@ -118,6 +118,11 @@ h1 {
   align-items: start;
 }
 
+.left-column {
+  display: grid;
+  gap: 12px;
+}
+
 .panel {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -129,6 +134,67 @@ h1 {
   padding: 18px;
   position: sticky;
   top: 16px;
+}
+
+.support-link {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  align-items: center;
+  gap: 12px;
+  min-height: 68px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+  box-shadow: var(--shadow);
+  color: var(--ink);
+  padding: 11px 13px;
+  text-decoration: none;
+}
+
+.support-link strong,
+.support-link span span {
+  display: block;
+}
+
+.support-link strong {
+  font-size: 0.96rem;
+  line-height: 1.2;
+}
+
+.support-link span span {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.support-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: #fff8e6;
+  color: var(--amber);
+}
+
+.support-icon svg {
+  width: 25px;
+  height: 25px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.support-link:hover,
+.support-link:focus-visible {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-soft), var(--shadow);
+  outline: none;
 }
 
 .field-grid {

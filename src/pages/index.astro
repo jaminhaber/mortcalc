@@ -12,7 +12,24 @@ import AmortizationTable from "../components/AmortizationTable.astro";
     <AppHeader />
 
     <section class="layout" aria-label="Mortgage calculator">
-      <CalculatorForm />
+      <aside class="left-column">
+        <CalculatorForm />
+        <a class="support-link" href="https://buymeacoffee.com/chillgames" target="_blank" rel="noopener noreferrer">
+          <span class="support-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path d="M5 8h10v6a5 5 0 0 1-10 0V8Z" />
+              <path d="M15 10h2a3 3 0 0 1 0 6h-2" />
+              <path d="M4 20h14" />
+              <path d="M8 4v2" />
+              <path d="M12 4v2" />
+            </svg>
+          </span>
+          <span>
+            <strong>Buy me a coffee</strong>
+            <span>Support the development</span>
+          </span>
+        </a>
+      </aside>
 
       <section>
         <SummaryPanel />
