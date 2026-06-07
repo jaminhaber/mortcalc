@@ -33,6 +33,22 @@ test("buildSchedule marks a normal loan as paid off", () => {
   assert.ok(schedule.remainingBalance <= 0.005);
 });
 
+test("annual extra payments are applied as a lump sum on the twelfth payment", () => {
+  const schedule = buildSchedule({
+    ...defaults,
+    annualExtraPayments: 2
+  });
+  const firstYearRows = schedule.rows.slice(0, 12);
+
+  assert.equal(firstYearRows.length, 12);
+  assert.deepEqual(firstYearRows.map((row) => row.number), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+  closeTo(firstYearRows[10].extra, 0);
+  closeTo(firstYearRows[11].interest, 1114.04);
+  closeTo(firstYearRows[11].extra, defaults.payment * 2);
+  closeTo(firstYearRows[11].balance, 195274.06);
+  assert.equal(schedule.payoffPayments, 246);
+});
+
 test("stalled schedules are not reported as paid off", () => {
   const values = {
     ...defaults,

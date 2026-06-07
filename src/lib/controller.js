@@ -24,7 +24,7 @@ const tableHint = document.getElementById("tableHint");
 const tablePageStatus = document.getElementById("tablePageStatus");
 const paginationButtons = Array.from(document.querySelectorAll("[data-page-action]"));
 const chart = document.getElementById("chart");
-const schedulePageSize = 24;
+const schedulePageSize = 12;
 let schedulePage = 0;
 let currentScheduleRows = [];
 

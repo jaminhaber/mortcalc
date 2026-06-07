@@ -121,6 +121,10 @@ h1 {
 .left-column {
   display: grid;
   gap: 12px;
+  grid-template-rows: minmax(0, 1fr) auto;
+  max-height: calc(100vh - 136px);
+  position: sticky;
+  top: 16px;
 }
 
 .panel {
@@ -131,9 +135,9 @@ h1 {
 }
 
 .controls {
+  min-height: 0;
+  overflow: auto;
   padding: 18px;
-  position: sticky;
-  top: 16px;
 }
 
 .support-link {
@@ -507,6 +511,15 @@ th {
   }
 
   .controls {
+    overflow: visible;
+    position: static;
+  }
+
+  .left-column {
+    display: grid;
+    gap: 12px;
+    grid-template-rows: none;
+    max-height: none;
     position: static;
     margin-bottom: 18px;
   }
